@@ -1,0 +1,56 @@
+From 0ad6e751d9103f08bf8abab4dac5cd55375785d6 Mon Sep 17 00:00:00 2001
+From: Lei Chen <lei.chen@smartx.com>
+Date: Fri, 20 May 2022 09:51:26 +0000
+Subject: [PATCH] fix hang on pthread_setaffinity_np failure
+
+---
+ src/cpucounters.cpp | 12 ++++++++----
+ 1 file changed, 8 insertions(+), 4 deletions(-)
+
+diff --git a/src/cpucounters.cpp b/src/cpucounters.cpp
+index 21cdc09..3eef8e2 100644
+--- a/src/cpucounters.cpp
++++ b/src/cpucounters.cpp
+@@ -143,7 +143,8 @@ public:
+         auto res = pthread_getaffinity_np(pthread_self(), sizeof(cpu_set_t), &old_affinity);
+         if (res != 0)
+         {
+-            std::cerr << "ERROR: pthread_getaffinity_np for core " << core_id << " failed with code " << res << "\n";
++            std::cerr << "ERROR: pthread_getaffinity_np for core " << core_id << " failed with code " << res << " exiting \n";
++            exit(EXIT_FAILURE);
+             throw std::exception();
+         }
+         cpu_set_t new_affinity;
+@@ -158,7 +159,8 @@ public:
+         res = pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &new_affinity);
+         if (res != 0 && checkStatus)
+         {
+-            std::cerr << "ERROR: pthread_setaffinity_np for core " << core_id << " failed with code " << res << "\n";
++            std::cerr << "ERROR: pthread_setaffinity_np for core " << core_id << " failed with code " << res << " exiting \n";
++            exit(EXIT_FAILURE);
+             throw std::exception();
+         }
+     }
+@@ -184,7 +186,8 @@ public:
+         auto res = pthread_getaffinity_np(pthread_self(), set_size, old_affinity);
+         if (res != 0)
+         {
+-            std::cerr << "ERROR: pthread_getaffinity_np for core " << core_id << " failed with code " << res << "\n";
++            std::cerr << "ERROR: pthread_getaffinity_np for core " << core_id << " failed with code " << res << " exiting \n";
++            exit(EXIT_FAILURE);
+             throw std::exception();
+         }
+         cpu_set_t * new_affinity = CPU_ALLOC(maxCPUs);
+@@ -201,7 +204,8 @@ public:
+         CPU_FREE(new_affinity);
+         if (res != 0 && checkStatus)
+         {
+-            std::cerr << "ERROR: pthread_setaffinity_np for core " << core_id << " failed with code " << res << "\n";
++            std::cerr << "ERROR: pthread_setaffinity_np for core " << core_id << " failed with code " << res << " exiting \n";
++            exit(EXIT_FAILURE);
+             throw std::exception();
+         }
+     }
+-- 
+2.25.1
+
