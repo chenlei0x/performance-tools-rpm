@@ -6,3 +6,4 @@ RUN yum --disableplugin=fastestmirror makecache && yum install -y epel-release &
 
 RUN yum install -y bison flex libxml2-devel ncurses-devel
 RUN yum install -y help2man perl-generators perl php-cli
+RUN yum install -y libpcap-devel
